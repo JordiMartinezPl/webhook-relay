@@ -1,0 +1,14 @@
+services:
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: webhook_relay
+      POSTGRES_PASSWORD: webhook_relay
+      POSTGRES_DB: webhook_relay
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql
+
+volumes:
+  postgres_data:
