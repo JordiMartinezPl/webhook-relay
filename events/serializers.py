@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Event, Subscriber
+from .models import Event, Subscriber , Delivery
 
 class EventSerializer(serializers.ModelSerializer):
     class Meta:
@@ -12,3 +12,4 @@ class SubscriberSerializer(serializers.ModelSerializer):
         model = Subscriber
         fields = ['id','subscribed_events','url','is_active','secret']
         read_only_fields = ['secret']
+
