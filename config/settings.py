@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'rest_framework.authtoken',
     'events',
     'django.contrib.postgres',
 ]
@@ -156,4 +157,12 @@ CELERY_BEAT_SCHEDULE = {
         'task': 'events.tasks.retry_failed_deliveries',
         'schedule': 10.0,
     },
+}
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
 }

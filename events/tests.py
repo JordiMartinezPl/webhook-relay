@@ -5,11 +5,21 @@ from unittest.mock import Mock, patch
 import pytest
 import requests
 from django.conf import settings
+from django.contrib.auth.models import User
 from django.utils import timezone
+from rest_framework.authtoken.models import Token
 
 from events.models import Delivery, DeliveryAttempt, Event, Subscriber, sign_payload
 from events.services import fan_out_event
 from events.tasks import deliver_webhook, retry_failed_deliveries
+
+
+@pytest.fixture
+def auth_client(client, db):
+    user = User.objects.create_user(username="tester", password="pass")
+    token = Token.objects.create(user=user)
+    client.defaults["HTTP_AUTHORIZATION"] = f"Token {token.key}"
+    return client
 
 
 def test_sign_payload_is_deterministic():
@@ -31,8 +41,8 @@ def test_sign_payload_changes_with_payload():
 
 
 @pytest.mark.django_db
-def test_create_event_returns_201(client):
-    response = client.post(
+def test_create_event_returns_201(auth_client):
+    response = auth_client.post(
         "/events/",
         data=json.dumps({"event_type": "order.paid", "payload": {"order_id": 1}}),
         content_type="application/json",
@@ -42,8 +52,8 @@ def test_create_event_returns_201(client):
 
 
 @pytest.mark.django_db
-def test_create_event_without_event_type_returns_400(client):
-    response = client.post(
+def test_create_event_without_event_type_returns_400(auth_client):
+    response = auth_client.post(
         "/events/",
         data=json.dumps({"payload": {"order_id": 1}}),
         content_type="application/json",
@@ -53,8 +63,8 @@ def test_create_event_without_event_type_returns_400(client):
 
 
 @pytest.mark.django_db
-def test_create_subscriber_returns_secret(client):
-    response = client.post(
+def test_create_subscriber_returns_secret(auth_client):
+    response = auth_client.post(
         "/events/subscribers/",
         data=json.dumps({"url": "https://example.com", "subscribed_events": ["order.paid"]}),
         content_type="application/json",
@@ -62,6 +72,16 @@ def test_create_subscriber_returns_secret(client):
     assert response.status_code == 201
     assert "secret" in response.json()
     assert response.json()["is_active"] is True
+
+
+@pytest.mark.django_db
+def test_create_event_without_token_returns_401(client):
+    response = client.post(
+        "/events/",
+        data=json.dumps({"event_type": "order.paid", "payload": {"order_id": 1}}),
+        content_type="application/json",
+    )
+    assert response.status_code == 401
 
 
 @pytest.mark.django_db

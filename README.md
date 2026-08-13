@@ -51,10 +51,24 @@ docker compose exec web python manage.py createsuperuser
 
 ## API
 
+All endpoints require a DRF auth token in the `Authorization` header.
+
+**Get a token** (create a user first with `createsuperuser`, then):
+```bash
+docker compose exec web python manage.py shell -c "
+from django.contrib.auth.models import User
+from rest_framework.authtoken.models import Token
+user = User.objects.get(username='<your_username>')
+token, _ = Token.objects.get_or_create(user=user)
+print(token.key)
+"
+```
+
 **Create an event:**
 ```bash
 curl -X POST http://127.0.0.1:8000/events/ \
   -H "Content-Type: application/json" \
+  -H "Authorization: Token <your_token>" \
   -d '{"event_type": "order.paid", "payload": {"order_id": 123}}'
 ```
 
@@ -62,6 +76,7 @@ curl -X POST http://127.0.0.1:8000/events/ \
 ```bash
 curl -X POST http://127.0.0.1:8000/events/subscribers/ \
   -H "Content-Type: application/json" \
+  -H "Authorization: Token <your_token>" \
   -d '{"url": "https://example.com/webhook", "subscribed_events": ["order.paid"]}'
 ```
 The response includes a `secret` — save it, it's only shown once. Use it to verify the `X-Signature` header on incoming deliveries.
