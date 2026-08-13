@@ -1,0 +1,36 @@
+name: CI
+"on": [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: webhook_relay
+          POSTGRES_PASSWORD: webhook_relay
+          POSTGRES_DB: webhook_relay
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: pip install -r requirements.txt
+      - run: pytest
+        env:
+          POSTGRESQL_NAME: webhook_relay
+          POSTGRESQL_USER: webhook_relay
+          POSTGRESQL_PASS: webhook_relay
+          POSTGRESQL_HOST: localhost
+          POSTGRESQL_PORT: 5432
