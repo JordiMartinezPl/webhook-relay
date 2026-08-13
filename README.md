@@ -6,15 +6,6 @@ Built as a learning project to practice backend architecture (Django/DRF), async
 
 ## How it works
 
-```
-POST /events/  →  Event saved  →  fan-out  →  Delivery per matching Subscriber  →  Celery worker POSTs to subscriber.url
-                                                                                          │
-                                                                            success ──────┤────── failure
-                                                                                          │            │
-                                                                                     status=SUCCESS   attempts left? → retry later (backoff)
-                                                                                                        no attempts left → status=FAILED
-```
-
 - **`Event`** — something that happened (`event_type` + JSON `payload`), submitted via the API.
 - **`Subscriber`** — a registered endpoint (`url`) interested in one or more `event_type`s, with a `secret` used to sign deliveries.
 - **`Delivery`** — one row per `(Event, Subscriber)` pair: the unit of work to deliver, tracking `status` and `next_attempt_at`.
