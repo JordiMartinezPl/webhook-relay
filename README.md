@@ -24,31 +24,29 @@ Built as a learning project to practice backend architecture (Django/DRF), async
 - PostgreSQL
 - Celery + Redis (async delivery + scheduled retries)
 - pytest / pytest-django
-- Docker Compose (Postgres + Redis)
+- Docker Compose (Postgres, Redis, Django, Celery worker, Celery beat)
 - GitHub Actions (CI)
 
 ## Running locally
 
-Requires Docker and a Python 3.13 virtualenv.
+Requires only Docker.
 
 ```bash
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-cp .env.example .env  # fill in local values
-python manage.py migrate
-```
-
-Start everything (Postgres, Redis, Django, Celery worker, Celery beat) with one command:
-
-```bash
+cp .env.example .env
 make dev
 ```
 
-This opens a tmux session with `runserver`, the Celery worker, and Celery beat each in their own pane. Stop everything with:
+This builds and starts everything — Postgres, Redis, Django (`web`), the Celery worker, and Celery beat — with `docker compose up --build`. Stop everything with:
 
 ```bash
 make stop
+```
+
+Run migrations and management commands inside the `web` container:
+
+```bash
+docker compose exec web python manage.py migrate
+docker compose exec web python manage.py createsuperuser
 ```
 
 ## API
@@ -71,6 +69,6 @@ The response includes a `secret` — save it, it's only shown once. Use it to ve
 ## Tests
 
 ```bash
-pytest
+docker compose exec web pytest
 ```
 
