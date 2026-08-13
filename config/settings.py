@@ -137,10 +137,12 @@ MAILERS = {
     },
 }
 
+REDIS_URL = env('REDIS_URL', default='redis://redis:6379/1')
+
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://redis:6379/1",
+        "LOCATION": REDIS_URL,
         "OPTIONS" :{
             "CLIENT_CLASS": "django_redis.client.DefaultClient"
         }
@@ -150,8 +152,8 @@ CACHES = {
 WEBHOOK_TIMEOUT = 5
 MAX_DELIVERY_ATTEMPTS = 3
 
-CELERY_BROKER_URL = "redis://redis:6379/1"
-CELERY_RESULT_BACKEND = "redis://redis:6379/1"
+CELERY_BROKER_URL = REDIS_URL
+CELERY_RESULT_BACKEND = REDIS_URL
 CELERY_BEAT_SCHEDULE = {
     'retry-failed-deliveries': {
         'task': 'events.tasks.retry_failed_deliveries',
