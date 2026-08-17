@@ -10,6 +10,6 @@ class EventSerializer(serializers.ModelSerializer):
 class SubscriberSerializer(serializers.ModelSerializer):
     class Meta:
         model = Subscriber
-        fields = ['id','subscribed_events','url','is_active','secret']
+        fields = ['id','subscribed_events','url','is_active','secret',]
         read_only_fields = ['secret']
 

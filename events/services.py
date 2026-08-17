@@ -3,7 +3,7 @@ from .models import Subscriber, Delivery
 from .tasks import deliver_webhook
 
 def fan_out_event(event):
-    subscribers = Subscriber.objects.filter(is_active=True, subscribed_events__contains=[event.event_type])
+    subscribers = Subscriber.objects.filter(is_active=True, subscribed_events__contains=[event.event_type],organization=event.organization)
     for subscriber in subscribers:
         delivery = Delivery.objects.create(
             event=event,

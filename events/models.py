@@ -21,6 +21,7 @@ class Event(models.Model):
     event_type = models.CharField(max_length=100)
     payload = models.JSONField(default=dict)
     received_at = models.DateTimeField(auto_now_add=True)
+    organization = models.ForeignKey('accounts.Organization', on_delete=models.CASCADE, related_name='events')
 
 
 class Subscriber(models.Model):
@@ -28,6 +29,7 @@ class Subscriber(models.Model):
     url = models.URLField(max_length=200)
     secret = models.CharField(max_length=64, default=generate_secret)
     is_active = models.BooleanField(default=True)
+    organization = models.ForeignKey('accounts.Organization', on_delete=models.CASCADE, related_name='subscribers')
 
 class Delivery(models.Model):
     class Status(models.TextChoices):
