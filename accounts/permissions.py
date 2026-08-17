@@ -1,5 +1,8 @@
 from rest_framework.permissions import BasePermission
 
+from .models import Membership
+
+
 class HasOrganizationPermission(BasePermission):
 
     def has_permission(self, request, view):
@@ -11,3 +14,13 @@ class HasOrganizationPermission(BasePermission):
             return False
         request.organization = membership.organization
         return True
+
+
+class IsOrganizationAdmin(BasePermission):
+
+    def has_permission(self, request, view):
+        membership = Membership.objects.filter(
+            user=request.user,
+            organization=request.organization,
+        ).first()
+        return membership is not None and membership.role == Membership.Role.ADMIN

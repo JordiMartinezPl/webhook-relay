@@ -1,3 +1,6 @@
+# Local handoff notes, never published
+HANDOFF.md
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
